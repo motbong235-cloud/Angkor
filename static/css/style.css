@@ -363,3 +363,45 @@ button, input { font-family: inherit; }
   .hero-banner { border-radius: 14px; }
   .logo-text { font-size: 1.05rem; }
 }
+
+.game-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+
+
+
+/* Telegram button */
+.btn-telegram {
+  background: linear-gradient(135deg, #2AABEE 0%, #229ED9 100%);
+  color: #fff !important;
+  border: none;
+  box-shadow: 0 4px 14px rgba(42, 171, 238, .35);
+}
+.btn-telegram:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(42, 171, 238, .45);
+  color: #fff !important;
+}
+
+/* Floating Telegram */
+.tg-float {
+  position: fixed;
+  right: 18px;
+  bottom: 22px;
+  z-index: 150;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2AABEE 0%, #229ED9 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(42, 171, 238, .45);
+  transition: transform .2s, box-shadow .2s;
+}
+.tg-float:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 28px rgba(42, 171, 238, .55);
+}
+@media (max-width: 480px) {
+  .tg-float { right: 14px; bottom: 16px; width: 52px; height: 52px; }
+}
