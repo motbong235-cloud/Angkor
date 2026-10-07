@@ -35,6 +35,7 @@ async function loadCatalog() {
           popular: !!g.popular,
           color: g.color || "#6366f1",
           emoji: g.emoji || "🎮",
+          image: g.image || null,
           packages: (g.packages || []).map((p) => ({
             package_id: p.id || p.package_id,
             name: p.name,
@@ -61,7 +62,11 @@ function renderGames(games) {
     .map(
       (g) => `
     <div class="game-card ${g.popular ? "popular" : ""}" onclick="openTopup('${g.slug}')">
-      <div class="game-img" style="background:${g.color}33">${g.emoji}</div>
+      <div class="game-img" style="background:${g.color || "#6366f1"}33;overflow:hidden">
+        ${g.image
+          ? `<img src="${g.image}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:16px">`
+          : (g.emoji || "🎮")}
+      </div>
       <div class="game-name">${g.name}</div>
     </div>`
     )
@@ -124,8 +129,15 @@ function openTopup(slug) {
   document.getElementById("modalGameSlug").textContent = currentGame.slug;
   const em = document.getElementById("modalGameEmoji");
   if (em) {
-    em.textContent = currentGame.emoji;
-    em.style.background = (currentGame.color || "#6366f1") + "33";
+    if (currentGame.image) {
+      em.innerHTML = `<img src="${currentGame.image}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
+      em.style.background = "transparent";
+      em.style.padding = "0";
+      em.style.overflow = "hidden";
+    } else {
+      em.textContent = currentGame.emoji;
+      em.style.background = (currentGame.color || "#6366f1") + "33";
+    }
   }
   document.getElementById("labelPlayerId").textContent =
     currentGame.id_label || "Player ID";
