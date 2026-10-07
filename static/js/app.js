@@ -479,10 +479,11 @@ function applyBranding(s) {
   if (s.SITE_NAME) document.title = s.SITE_NAME + " | Top-up ហ្គេម";
   const note = document.getElementById("heroNote");
   if (note && s.CONTACT_NOTE) note.textContent = s.CONTACT_NOTE;
-  const tg = document.getElementById("tgLink");
-  if (tg && s.TELEGRAM) tg.href = s.TELEGRAM;
-  const tgf = document.getElementById("tgFooter");
-  if (tgf && s.TELEGRAM) tgf.href = s.TELEGRAM;
+  const tgUrl = s.TELEGRAM || "https://t.me/kairozen_support";
+  ["tgLink", "tgFooter", "tgMobile", "tgFloat"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.href = tgUrl;
+  });
   const logo = s.LOGO_URL || "/static/img/logo.svg";
   document.querySelectorAll("#siteLogo, .logo-img").forEach((el) => { el.src = logo; });
   const banner = document.getElementById("siteBanner");
