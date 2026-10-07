@@ -80,13 +80,32 @@ th{color:var(--muted);font-weight:700}
     </div>
 
     <div id="t-games" class="card hidden">
-      <div class="row" style="justify-content:space-between;margin-bottom:12px">
-        <h3 style="font-weight:700">Games & Packages</h3>
-        <div class="row">
-          <button class="btn btn-green" onclick="syncGames()">Sync ពី Khmer TopUp</button>
-          <button class="btn btn-blue" onclick="showAddGame()">+ បន្ថែមហ្គេម</button>
+      <div class="row" style="justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <h3 style="font-weight:700">Games &amp; Packages</h3>
+        <div class="row" style="flex-wrap:wrap;gap:6px">
+          <button class="btn btn-green" onclick="syncGames()">⬇ Sync Khmer TopUp</button>
+          <button class="btn btn-blue" onclick="showAddGame()">+ បន្ថែម</button>
+          <button class="btn btn-red" onclick="clearAllGames()">Clear all</button>
         </div>
       </div>
+
+      <!-- Markup % -->
+      <div style="padding:14px;background:#0D1424;border-radius:12px;margin-bottom:14px;border:1px solid var(--line)">
+        <div class="row" style="align-items:flex-end;flex-wrap:wrap;gap:10px">
+          <div style="flex:1;min-width:140px">
+            <label>តម្លៃបន្ថែម (% markup)</label>
+            <input id="markupPct" type="number" step="0.1" placeholder="ឧ. 10 = +10%" style="margin:0">
+          </div>
+          <button class="btn btn-gold" onclick="applyMarkup()">អនុវត្ត % លើតម្លៃទាំងអស់</button>
+          <button class="btn btn-ghost" onclick="setAllActive(true)">Enable all</button>
+          <button class="btn btn-ghost" onclick="setAllActive(false)">Disable all</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px">
+          ឧទាហរណ៍ base $1.00 + <b>10%</b> = លក់ <b>$1.10</b>។ Sync ពី API នឹងប្រើ % នេះស្វ័យប្រវត្តិ។
+          ហ្គេមថ្មីពី Sync = <b>បិទ</b> → អ្នកបើកតែហ្គេមដែលចង់បាន។
+        </p>
+      </div>
+
       <div id="addGameForm" class="hidden" style="margin-bottom:14px;padding:14px;background:#0D1424;border-radius:12px">
         <div class="row">
           <div style="flex:1"><label>Slug *</label><input id="gSlug" placeholder="mobile-legends"></div>
@@ -94,13 +113,18 @@ th{color:var(--muted);font-weight:700}
         </div>
         <div class="row">
           <div style="flex:1"><label>ID Label</label><input id="gIdLabel" value="User ID"></div>
-          <div style="flex:1"><label>Server Label</label><input id="gServerLabel" placeholder="Zone ID (ទុកទទេបើមិនត្រូវការ)"></div>
+          <div style="flex:1"><label>Server Label</label><input id="gServerLabel" placeholder="Zone ID (ទុកទទេបើមិនត្រូវ)"></div>
           <div style="width:80px"><label>Emoji</label><input id="gEmoji" value="🎮"></div>
         </div>
+        <label>រូបហ្គេម (Image URL)</label>
+        <input id="gImage" placeholder="https://...png ឬ /static/img/..." oninput="previewGameImg()">
+        <div style="margin:8px 0"><img id="gImagePrev" src="" alt="" style="height:56px;border-radius:12px;display:none;border:1px solid var(--line)"></div>
         <label>Packages (JSON)</label>
         <textarea id="gPackages" rows="5" placeholder='[{"id":1,"name":"55 Diamonds","price":0.85,"tag":"Popular"}]'></textarea>
-        <button class="btn btn-gold" onclick="saveGame()">រក្សាទុក</button>
-        <button class="btn btn-ghost" onclick="$('#addGameForm').classList.add('hidden')">បោះបង់</button>
+        <div class="row" style="gap:8px;margin-top:8px">
+          <button class="btn btn-gold" onclick="saveGame()">រក្សាទុក</button>
+          <button class="btn btn-ghost" onclick="$('#addGameForm').classList.add('hidden');$('#gSlug').disabled=false">បោះបង់</button>
+        </div>
       </div>
       <div id="gameList"></div>
     </div>
@@ -156,6 +180,8 @@ th{color:var(--muted);font-weight:700}
       </div>
 
       <h4 style="margin:18px 0 10px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em">Payment &amp; Fulfill</h4>
+      <label>តម្លៃបន្ថែម % (PRICE_MARKUP_PERCENT)</label>
+      <input id="sMarkup" type="number" step="0.1" placeholder="0 = គ្មាន markup">
       <label>Auto fulfill (via Khmer TopUp API)</label>
       <select id="sAuto"><option value="1">បើក — deliver ភ្លាម</option><option value="0">បិទ — Admin manual</option></select>
       <label>Admin password (ថ្មី)</label><input id="sPw" type="password" placeholder="ទុកទទេ បើមិនប្តូរ">
@@ -208,6 +234,10 @@ async function load(){
   $("#sBanner").value = r.settings.BANNER_URL||"";
   $("#sFavicon").value = r.settings.FAVICON_URL||"";
   $("#sAuto").value = r.settings.AUTO_FULFILL === false ? "0" : "1";
+  const mk = r.settings.PRICE_MARKUP_PERCENT;
+  $("#sMarkup").value = mk != null ? mk : "";
+  const mp = document.getElementById("markupPct");
+  if (mp && mk != null) mp.value = mk;
   const logoUrl = r.settings.LOGO_URL || "/static/img/logo.svg";
   const banUrl = r.settings.BANNER_URL || "/static/img/banner.svg";
   const pl = document.getElementById("prevLogo"); if(pl) pl.src = logoUrl;
@@ -264,27 +294,49 @@ function renderOrders(){
     </tr>`).join("") || `<tr><td colspan="7">គ្មាន order</td></tr>`;
 }
 function renderGames(){
-  const el = $("#gameList");
-  el.innerHTML = (DATA.games||[]).map(g => `
-    <div style="padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px">
-      <div class="row" style="justify-content:space-between">
-        <div><b>${g.emoji||''} ${g.name}</b> <span class="mono" style="color:var(--muted);font-size:11px">${g.slug}</span>
-          ${g.popular?' <span style="color:var(--gold);font-size:11px">HOT</span>':''}
+  const list = DATA.games || [];
+  const activeN = list.filter(g => g.active !== false).length;
+  $("#gameList").innerHTML = `
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px">
+      សរុប <b style="color:var(--text)">${list.length}</b> ហ្គេម · 
+      បង្ហាញលើ website: <b style="color:var(--cyan)">${activeN}</b>
+    </p>` + list.map(g => {
+    const on = g.active !== false;
+    const img = g.image
+      ? `<img src="${g.image}" alt="" style="width:40px;height:40px;border-radius:10px;object-fit:cover">`
+      : `<span style="font-size:24px">${g.emoji||"🎮"}</span>`;
+    return `<div style="padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;opacity:${on?1:0.55}">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div class="row" style="gap:10px;align-items:center">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:0">
+            <input type="checkbox" ${on?"checked":""} onchange="toggleGame('${g.slug}', this.checked)" style="width:18px;height:18px">
+          </label>
+          ${img}
+          <div>
+            <b>${g.name||g.slug}</b>
+            <span class="mono" style="color:var(--muted);font-size:11px;margin-left:6px">${g.slug}</span>
+            ${g.popular?' <span style="color:var(--gold);font-size:11px">HOT</span>':''}
+            ${on?'':' <span style="color:var(--red);font-size:11px">OFF</span>'}
+          </div>
         </div>
         <div class="row">
           <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="editGame('${g.slug}')">កែ</button>
           <button class="btn btn-red" style="padding:4px 8px;font-size:11px" onclick="delGame('${g.slug}')">លុប</button>
         </div>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-top:6px">
-        ${(g.packages||[]).map(p => `${p.name} $${Number(p.price).toFixed(2)}`).join(" · ") || "គ្មាន package"}
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;padding-left:28px">
+        ${(g.packages||[]).slice(0,6).map(p => `${p.name} <b style="color:var(--cyan)">$${Number(p.price).toFixed(2)}</b>`).join(" · ") || "គ្មាន package"}
+        ${(g.packages||[]).length>6?' …':''}
       </div>
-    </div>`).join("") || "<p style='color:var(--muted)'>មិនមានហ្គេម</p>";
+    </div>`;
+  }).join("") || "<p style='color:var(--muted)'>មិនមានហ្គេម — Sync ឬ បន្ថែម</p>";
 }
 function showAddGame(){
   $("#addGameForm").classList.remove("hidden");
+  $("#gSlug").disabled = false;
   $("#gSlug").value=""; $("#gName").value=""; $("#gIdLabel").value="User ID";
-  $("#gServerLabel").value=""; $("#gEmoji").value="🎮";
+  $("#gServerLabel").value=""; $("#gEmoji").value="🎮"; $("#gImage").value="";
+  $("#gImagePrev").style.display="none";
   $("#gPackages").value='[{"id":1,"name":"55 Diamonds","price":0.85,"tag":"Popular"}]';
   $("#addGameForm").dataset.edit = "";
 }
@@ -299,6 +351,9 @@ function editGame(slug){
   $("#gIdLabel").value = g.id_label||"User ID";
   $("#gServerLabel").value = g.server_label||"";
   $("#gEmoji").value = g.emoji||"🎮";
+  $("#gImage").value = g.image||"";
+  const prev = document.getElementById("gImagePrev");
+  if (g.image) { prev.src=g.image; prev.style.display="block"; } else { prev.style.display="none"; }
   $("#gPackages").value = JSON.stringify(g.packages||[], null, 2);
 }
 async function saveGame(){
@@ -312,6 +367,7 @@ async function saveGame(){
     id_label: $("#gIdLabel").value.trim(),
     server_label: $("#gServerLabel").value.trim() || null,
     emoji: $("#gEmoji").value.trim(),
+    image: ($("#gImage").value||"").trim() || null,
     packages,
   };
   if(!body.slug || !body.name){ alert("Slug + Name ចាំបាច់"); return; }
@@ -324,6 +380,37 @@ async function saveGame(){
   $("#addGameForm").classList.add("hidden");
   load();
 }
+
+function previewGameImg(){
+  const u = ($("#gImage").value||"").trim();
+  const p = document.getElementById("gImagePrev");
+  if(!p) return;
+  if(u){ p.src=u; p.style.display="block"; } else p.style.display="none";
+}
+async function toggleGame(slug, active){
+  const r = await api("admin/game", {method:"PUT", body:JSON.stringify({slug, active})});
+  if(!r.ok) alert(r.error||"Fail");
+  else load();
+}
+async function setAllActive(active){
+  if(!confirm(active ? "បើកហ្គេមទាំងអស់?" : "បិទហ្គេមទាំងអស់?")) return;
+  const r = await api("admin/games/bulk-active", {method:"POST", body:JSON.stringify({all:true, active})});
+  if(r.ok) load(); else alert(r.error||"Fail");
+}
+async function clearAllGames(){
+  if(!confirm("លុបហ្គេមទាំងអស់ពី catalog? (មិនអាចត្រឡប់)")) return;
+  const r = await api("admin/games/clear", {method:"POST", body:"{}"});
+  if(r.ok){ alert(r.message||"OK"); load(); } else alert(r.error||"Fail");
+}
+async function applyMarkup(){
+  const pct = parseFloat(document.getElementById("markupPct").value);
+  if (isNaN(pct)) { alert("វាយ % markup"); return; }
+  if(!confirm("អនុវត្ត markup "+pct+"% លើ packages ទាំងអស់?")) return;
+  const r = await api("admin/games/apply-markup", {method:"POST", body:JSON.stringify({percent: pct})});
+  if(r.ok){ alert("Updated "+r.packages_updated+" packages · markup "+r.markup+"%"); load(); }
+  else alert(r.error||"Fail");
+}
+
 async function delGame(slug){
   if(!confirm("លុប "+slug+"?")) return;
   await api("admin/game", {method:"DELETE", body:JSON.stringify({slug})});
@@ -350,6 +437,7 @@ async function saveSettings(){
     BANNER_URL: $("#sBanner").value.trim(),
     FAVICON_URL: $("#sFavicon").value.trim(),
     AUTO_FULFILL: $("#sAuto").value === "1",
+    PRICE_MARKUP_PERCENT: parseFloat($("#sMarkup").value) || 0,
   };
   if ($("#sPw").value) body.ADMIN_PASSWORD = $("#sPw").value;
   const r = await api("admin/settings", {method:"PUT", body:JSON.stringify(body)});
