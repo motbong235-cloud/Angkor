@@ -1,1 +1,364 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · AngkorTopUp</title>
+<meta name="theme-color" content="#0B1020">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kantumruy+Pro:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B1020;--card:#141C30;--line:rgba(99,130,255,.18);
+  --text:#E8EEF9;--muted:#8B9BB8;--blue:#3B82F6;--gold:#FBBF24;
+  --green:#34D399;--red:#F87171;--cyan:#22D3EE;
+  --font:'Inter','Kantumruy Pro',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+button,input,textarea,select{font-family:inherit}
+.wrap{max-width:960px;margin:0 auto;padding:16px}
+h1{font-size:20px;font-weight:800}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+label{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+input,textarea,select{width:100%;padding:11px 12px;border-radius:11px;border:1px solid var(--line);background:#0D1424;color:var(--text);margin-bottom:10px;outline:none;font-size:14px}
+input:focus,textarea:focus{border-color:var(--blue)}
+.btn{border:0;border-radius:11px;padding:10px 14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-gold{background:var(--gold);color:#1a1200}
+.btn-ghost{background:#1a2338;color:var(--text);border:1px solid var(--line)}
+.btn-red{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.28)}
+.btn-green{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:10px 6px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:700}
+.tabs{display:flex;gap:6px;margin:14px 0;flex-wrap:wrap}
+.tab{padding:9px 14px;border-radius:999px;background:#1a2338;border:1px solid var(--line);cursor:pointer;font-weight:700;font-size:12px}
+.tab.on{background:rgba(59,130,246,.22);border-color:var(--blue);color:#93C5FD}
+.hidden{display:none}
+.mono{font-family:var(--mono)}
+.ok{color:var(--green)}.wait{color:var(--gold)}.bad{color:var(--red)}
+.status{font-size:11px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="row" style="justify-content:space-between;margin-bottom:16px">
+    <div>
+      <h1>Admin · AngkorTopUp</h1>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px">Games · Orders · Visitors · Settings</p>
+    </div>
+    <div class="row">
+      <a class="btn btn-ghost" href="/">← Shop</a>
+      <button class="btn btn-ghost" onclick="logout()">Logout</button>
+    </div>
+  </div>
 
+  <div id="loginBox" class="card">
+    <label>Admin password</label>
+    <input type="password" id="pw" placeholder="admin123" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn btn-blue" onclick="login()">ចូល</button>
+  </div>
+
+  <div id="panel" class="hidden">
+    <div class="tabs">
+      <button class="tab on" data-t="orders" onclick="tab('orders')">Orders</button>
+      <button class="tab" data-t="games" onclick="tab('games')">Games</button>
+      <button class="tab" data-t="visitors" onclick="tab('visitors')">Visitors</button>
+      <button class="tab" data-t="settings" onclick="tab('settings')">Settings</button>
+    </div>
+
+    <div id="t-orders" class="card">
+      <h3 style="margin-bottom:12px;font-weight:700">Orders</h3>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>ID</th><th>Game</th><th>Package</th><th>Player</th><th>Price</th><th>Status</th><th></th></tr></thead>
+          <tbody id="orderRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="t-games" class="card hidden">
+      <div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <h3 style="font-weight:700">Games & Packages</h3>
+        <div class="row">
+          <button class="btn btn-green" onclick="syncGames()">Sync ពី Khmer TopUp</button>
+          <button class="btn btn-blue" onclick="showAddGame()">+ បន្ថែមហ្គេម</button>
+        </div>
+      </div>
+      <div id="addGameForm" class="hidden" style="margin-bottom:14px;padding:14px;background:#0D1424;border-radius:12px">
+        <div class="row">
+          <div style="flex:1"><label>Slug *</label><input id="gSlug" placeholder="mobile-legends"></div>
+          <div style="flex:1"><label>Name *</label><input id="gName" placeholder="Mobile Legends"></div>
+        </div>
+        <div class="row">
+          <div style="flex:1"><label>ID Label</label><input id="gIdLabel" value="User ID"></div>
+          <div style="flex:1"><label>Server Label</label><input id="gServerLabel" placeholder="Zone ID (ទុកទទេបើមិនត្រូវការ)"></div>
+          <div style="width:80px"><label>Emoji</label><input id="gEmoji" value="🎮"></div>
+        </div>
+        <label>Packages (JSON)</label>
+        <textarea id="gPackages" rows="5" placeholder='[{"id":1,"name":"55 Diamonds","price":0.85,"tag":"Popular"}]'></textarea>
+        <button class="btn btn-gold" onclick="saveGame()">រក្សាទុក</button>
+        <button class="btn btn-ghost" onclick="$('#addGameForm').classList.add('hidden')">បោះបង់</button>
+      </div>
+      <div id="gameList"></div>
+    </div>
+
+    
+    <div id="t-visitors" class="card hidden">
+      <div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <h3 style="font-weight:700">Visitors (1 IP = 1 User)</h3>
+        <button class="btn btn-red" onclick="clearVisitors()">Clear all</button>
+      </div>
+      <div class="row" style="gap:16px;margin-bottom:16px">
+        <div style="background:#1a2338;border:1px solid var(--line);border-radius:12px;padding:14px 18px;min-width:120px">
+          <div style="font-size:11px;color:var(--muted);font-weight:700">UNIQUE USERS</div>
+          <div id="vUnique" style="font-size:28px;font-weight:800;color:var(--cyan)">0</div>
+        </div>
+        <div style="background:#1a2338;border:1px solid var(--line);border-radius:12px;padding:14px 18px;min-width:120px">
+          <div style="font-size:11px;color:var(--muted);font-weight:700">TOTAL HITS</div>
+          <div id="vHits" style="font-size:28px;font-weight:800;color:var(--gold)">0</div>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>#</th><th>IP</th><th>Hits</th><th>First seen</th><th>Last seen</th><th>User-Agent</th></tr></thead>
+          <tbody id="visitorRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+<div id="t-settings" class="card hidden">
+      <h3 style="margin-bottom:12px;font-weight:700">Settings</h3>
+      <div id="statusBar" style="padding:12px;border-radius:10px;background:#0D1424;margin-bottom:14px;font-size:13px;line-height:1.7">
+        <div>KHPay: <b id="stKhpay">—</b></div>
+        <div>Khmer TopUp API: <b id="stKt">—</b></div>
+        <div>Disk: <b id="stDisk">—</b></div>
+        <div id="stBal"></div>
+      </div>
+      <h4 style="margin:0 0 10px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em">General</h4>
+      <label>Site name</label><input id="sName" placeholder="AngkorTopUp">
+      <label>Tagline</label><input id="sTag" placeholder="Top-up ហ្គេមលឿន">
+      <label>Telegram Support</label><input id="sTg" placeholder="https://t.me/...">
+      <label>Contact / Hero note</label><input id="sNote" placeholder="សារលើទំព័រដើម">
+
+      <h4 style="margin:18px 0 10px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em">Logo &amp; Banner</h4>
+      <label>Logo URL (ទុកទទេ = default /static/img/logo.svg)</label>
+      <input id="sLogo" placeholder="/static/img/logo.svg ឬ https://...">
+      <label>Banner URL (ទុកទទេ = default banner)</label>
+      <input id="sBanner" placeholder="/static/img/banner.svg ឬ https://...">
+      <label>Favicon URL</label>
+      <input id="sFavicon" placeholder="/static/img/favicon.svg">
+      <div class="row" style="gap:12px;margin:10px 0;align-items:center">
+        <img id="prevLogo" src="/static/img/logo.svg" alt="logo" style="width:48px;height:48px;border-radius:12px;border:1px solid var(--line);background:#0b0f1a">
+        <img id="prevBanner" src="/static/img/banner.svg" alt="banner" style="height:48px;border-radius:8px;border:1px solid var(--line);max-width:200px;object-fit:cover">
+      </div>
+
+      <h4 style="margin:18px 0 10px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em">Payment &amp; Fulfill</h4>
+      <label>Auto fulfill (via Khmer TopUp API)</label>
+      <select id="sAuto"><option value="1">បើក — deliver ភ្លាម</option><option value="0">បិទ — Admin manual</option></select>
+      <label>Admin password (ថ្មី)</label><input id="sPw" type="password" placeholder="ទុកទទេ បើមិនប្តូរ">
+
+      <p style="font-size:12px;color:var(--muted);margin:12px 0;line-height:1.7">
+        💳 <b>KHPAY_API_KEY</b> និង <b>KHMER_TOPUP_API_KEY</b> ត្រូវដាក់ជា ENV លើ Render<br>
+        · KHPay: <a href="https://khpay.site" target="_blank" style="color:#93C5FD">khpay.site</a><br>
+        · Khmer TopUp: <a href="https://khmer-topup.com" target="_blank" style="color:#93C5FD">khmer-topup.com</a><br>
+        · Logo/Banner: ប្រើ URL ខាងក្រៅ ឬ path <code>/static/img/...</code>
+      </p>
+      <button class="btn btn-blue" onclick="saveSettings()">💾 រក្សាទុក Settings</button>
+    </div>
+  </div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+let DATA = {};
+async function api(path, opts={}){
+  const r = await fetch("/api/" + path, {
+    headers: {"Content-Type":"application/json", ...(opts.headers||{})},
+    ...opts,
+  });
+  return r.json();
+}
+async function login(){
+  const r = await api("admin/login", {method:"POST", body:JSON.stringify({password: $("#pw").value})});
+  if(!r.ok){ alert(r.error||"Fail"); return; }
+  $("#loginBox").classList.add("hidden");
+  $("#panel").classList.remove("hidden");
+  load();
+}
+async function logout(){ await api("admin/logout", {method:"POST"}); location.reload(); }
+function tab(name){
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.t===name));
+  ["orders","games","visitors","settings"].forEach(n => {
+    const el = document.getElementById("t-"+n);
+    if (el) el.classList.toggle("hidden", n !== name);
+  });
+}
+async function load(){
+  const r = await api("admin/data");
+  if(!r.ok){ $("#loginBox").classList.remove("hidden"); $("#panel").classList.add("hidden"); return; }
+  DATA = r;
+  renderOrders(); renderGames(); renderVisitors();
+  $("#sName").value = r.settings.SITE_NAME||"";
+  $("#sTag").value = r.settings.SITE_TAGLINE||"";
+  $("#sTg").value = r.settings.TELEGRAM||"";
+  $("#sNote").value = r.settings.CONTACT_NOTE||"";
+  $("#sLogo").value = r.settings.LOGO_URL||"";
+  $("#sBanner").value = r.settings.BANNER_URL||"";
+  $("#sFavicon").value = r.settings.FAVICON_URL||"";
+  $("#sAuto").value = r.settings.AUTO_FULFILL === false ? "0" : "1";
+  const logoUrl = r.settings.LOGO_URL || "/static/img/logo.svg";
+  const banUrl = r.settings.BANNER_URL || "/static/img/banner.svg";
+  const pl = document.getElementById("prevLogo"); if(pl) pl.src = logoUrl;
+  const pb = document.getElementById("prevBanner"); if(pb) pb.src = banUrl;
+  $("#stKhpay").textContent = r.khpay_ready ? "✅ Ready" : "❌ មិនទាន់ដាក់ KHPAY_API_KEY";
+  $("#stKhpay").className = r.khpay_ready ? "ok" : "bad";
+  $("#stKt").textContent = r.kt_ready ? "✅ Ready" : "⚠️ Optional (manual fulfill)";
+  $("#stKt").className = r.kt_ready ? "ok" : "wait";
+  $("#stDisk").textContent = r.storage_persistent ? "✅ Persistent" : "⚠️ គ្មាន Disk";
+  if(r.kt_balance && r.kt_balance.balance != null){
+    $("#stBal").innerHTML = "KT Wallet: <b class='ok'>$" + Number(r.kt_balance.balance).toFixed(2) + "</b>";
+  }
+}
+
+function renderVisitors(){
+  const v = DATA.visitors || {unique:0, total_hits:0, list:[]};
+  const u = document.getElementById("vUnique");
+  const h = document.getElementById("vHits");
+  if (u) u.textContent = v.unique || 0;
+  if (h) h.textContent = v.total_hits || 0;
+  const rows = document.getElementById("visitorRows");
+  if (!rows) return;
+  const list = v.list || [];
+  rows.innerHTML = list.map((x, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td class="mono"><b>${x.ip}</b></td>
+      <td>${x.hits}</td>
+      <td class="mono" style="font-size:11px">${x.first_seen||""}</td>
+      <td class="mono" style="font-size:11px">${x.last_seen||""}</td>
+      <td style="font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(x.ua||"").replace(/"/g,"&quot;")}">${(x.ua||"").slice(0,60)}</td>
+    </tr>`).join("") || `<tr><td colspan="6">មិនទាន់មាន visitor</td></tr>`;
+}
+async function clearVisitors(){
+  if (!confirm("លុប IP visitors ទាំងអស់?")) return;
+  const r = await api("admin/visitors/clear", {method:"POST"});
+  if (r.ok) load();
+  else alert(r.error||"Fail");
+}
+
+function renderOrders(){
+  $("#orderRows").innerHTML = (DATA.orders||[]).map(o => `
+    <tr>
+      <td class="mono"><b>${o.id}</b></td>
+      <td>${o.game_name||""}</td>
+      <td>${o.package_name||""}</td>
+      <td class="mono">${o.player_id||""}${o.server_id?" / "+o.server_id:""}</td>
+      <td>$${Number(o.price).toFixed(2)}</td>
+      <td class="status ${["completed","delivered","paid"].includes(o.status)?"ok":o.status==="pending_payment"?"wait":""}">${o.status}</td>
+      <td>
+        <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="markOrder('${o.id}','completed')">Done</button>
+        <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="markOrder('${o.id}','waiting_fulfill')">Wait</button>
+      </td>
+    </tr>`).join("") || `<tr><td colspan="7">គ្មាន order</td></tr>`;
+}
+function renderGames(){
+  const el = $("#gameList");
+  el.innerHTML = (DATA.games||[]).map(g => `
+    <div style="padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px">
+      <div class="row" style="justify-content:space-between">
+        <div><b>${g.emoji||''} ${g.name}</b> <span class="mono" style="color:var(--muted);font-size:11px">${g.slug}</span>
+          ${g.popular?' <span style="color:var(--gold);font-size:11px">HOT</span>':''}
+        </div>
+        <div class="row">
+          <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="editGame('${g.slug}')">កែ</button>
+          <button class="btn btn-red" style="padding:4px 8px;font-size:11px" onclick="delGame('${g.slug}')">លុប</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">
+        ${(g.packages||[]).map(p => `${p.name} $${Number(p.price).toFixed(2)}`).join(" · ") || "គ្មាន package"}
+      </div>
+    </div>`).join("") || "<p style='color:var(--muted)'>មិនមានហ្គេម</p>";
+}
+function showAddGame(){
+  $("#addGameForm").classList.remove("hidden");
+  $("#gSlug").value=""; $("#gName").value=""; $("#gIdLabel").value="User ID";
+  $("#gServerLabel").value=""; $("#gEmoji").value="🎮";
+  $("#gPackages").value='[{"id":1,"name":"55 Diamonds","price":0.85,"tag":"Popular"}]';
+  $("#addGameForm").dataset.edit = "";
+}
+function editGame(slug){
+  const g = (DATA.games||[]).find(x => x.slug===slug);
+  if(!g) return;
+  $("#addGameForm").classList.remove("hidden");
+  $("#addGameForm").dataset.edit = slug;
+  $("#gSlug").value = g.slug;
+  $("#gSlug").disabled = true;
+  $("#gName").value = g.name||"";
+  $("#gIdLabel").value = g.id_label||"User ID";
+  $("#gServerLabel").value = g.server_label||"";
+  $("#gEmoji").value = g.emoji||"🎮";
+  $("#gPackages").value = JSON.stringify(g.packages||[], null, 2);
+}
+async function saveGame(){
+  let packages;
+  try { packages = JSON.parse($("#gPackages").value || "[]"); }
+  catch(e){ alert("Packages JSON មិនត្រឹមត្រូវ"); return; }
+  const edit = $("#addGameForm").dataset.edit;
+  const body = {
+    slug: $("#gSlug").value.trim(),
+    name: $("#gName").value.trim(),
+    id_label: $("#gIdLabel").value.trim(),
+    server_label: $("#gServerLabel").value.trim() || null,
+    emoji: $("#gEmoji").value.trim(),
+    packages,
+  };
+  if(!body.slug || !body.name){ alert("Slug + Name ចាំបាច់"); return; }
+  const r = await api("admin/game", {
+    method: edit ? "PUT" : "POST",
+    body: JSON.stringify(body),
+  });
+  if(!r.ok){ alert(r.error||"Fail"); return; }
+  $("#gSlug").disabled = false;
+  $("#addGameForm").classList.add("hidden");
+  load();
+}
+async function delGame(slug){
+  if(!confirm("លុប "+slug+"?")) return;
+  await api("admin/game", {method:"DELETE", body:JSON.stringify({slug})});
+  load();
+}
+async function syncGames(){
+  if(!confirm("Sync games/packages ពី Khmer TopUp API?")) return;
+  const r = await api("admin/sync-games", {method:"POST"});
+  if(!r.ok){ alert(r.error||"Fail — ត្រូវដាក់ KHMER_TOPUP_API_KEY"); return; }
+  alert("Added: "+r.added+" · Updated: "+r.updated+" · Total: "+r.total);
+  load();
+}
+async function markOrder(id, status){
+  await api("admin/order", {method:"PATCH", body:JSON.stringify({id, status})});
+  load();
+}
+async function saveSettings(){
+  const body = {
+    SITE_NAME: $("#sName").value,
+    SITE_TAGLINE: $("#sTag").value,
+    TELEGRAM: $("#sTg").value,
+    CONTACT_NOTE: $("#sNote").value,
+    LOGO_URL: $("#sLogo").value.trim(),
+    BANNER_URL: $("#sBanner").value.trim(),
+    FAVICON_URL: $("#sFavicon").value.trim(),
+    AUTO_FULFILL: $("#sAuto").value === "1",
+  };
+  if ($("#sPw").value) body.ADMIN_PASSWORD = $("#sPw").value;
+  const r = await api("admin/settings", {method:"PUT", body:JSON.stringify(body)});
+  if (r.ok) { alert("✅ រក្សាទុក Settings រួច"); load(); }
+  else alert(r.error || "Fail");
+}
+api("admin/me").then(r => {
+  if(r.admin){ $("#loginBox").classList.add("hidden"); $("#panel").classList.remove("hidden"); load(); }
+});
+</script>
+</body>
+</html>
