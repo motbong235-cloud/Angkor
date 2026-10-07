@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="AngkorTopUp - Top-up ហ្គេមលឿនបំផុតនៅកម្ពុជា | Mobile Legends, Free Fire, PUBG និងច្រើនទៀត" />
+  <title>AngkorTopUp | Top-up ហ្គេមលឿន & សុវត្ថិភាព</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="/" class="logo">
+        <img src="/static/img/logo.svg" alt="AngkorTopUp" class="logo-img" id="siteLogo" width="40" height="40" />
+        <span class="logo-text" id="siteLogoText">Angkor<span>TopUp</span></span>
+      </a>
+      <nav class="nav">
+        <a href="#games" class="nav-link">ហ្គេម</a>
+        <a href="#how" class="nav-link">របៀបទិញ</a>
+        <a href="/track" class="nav-link">តាមដាន Order</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/track" class="btn btn-outline btn-sm">តាមដាន</a>
+        <a href="https://t.me/kairozen_support" id="tgLink" class="btn btn-telegram btn-sm" target="_blank" rel="noopener">✈️ Telegram</a>
+      </div>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#games">ហ្គេម</a>
+    <a href="#how">របៀបទិញ</a>
+    <a href="/track">តាមដាន Order</a>
+    <a href="https://t.me/kairozen_support" id="tgMobile" target="_blank" rel="noopener">✈️ Telegram Support</a>
+    <a href="#faq">FAQ</a>
+  </div>
+
+  <div class="hero-banner-wrap" id="bannerWrap">
+    <img src="/static/img/banner.svg" alt="AngkorTopUp Banner" class="hero-banner" id="siteBanner" />
+  </div>
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-badge">🔥 លឿនបំផុតនៅកម្ពុជា</div>
+      <h1>Top-up ហ្គេម<br /><span class="gradient-text">លឿន • សុវត្ថិភាព • ថោក</span></h1>
+      <p class="hero-desc">ទិញ Diamonds, UC, Tokens សម្រាប់ Mobile Legends, Free Fire, PUBG និងហ្គេមច្រើនទៀត។ ដឹកជញ្ជូនភ្លាមៗតាមរយៈ Khmer TopUp API។</p>
+      <div class="hero-cta">
+        <a href="#games" class="btn btn-primary btn-lg">ជ្រើសរើសហ្គេម →</a>
+        <a href="/track" class="btn btn-ghost btn-lg">តាមដាន Order</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>160+</strong><span>ហ្គេម</span></div>
+        <div class="stat"><strong>&lt; 30s</strong><span>ដឹកជញ្ជូន</span></div>
+        <div class="stat"><strong>24/7</strong><span>សេវាកម្ម</span></div>
+      </div>
+    </div>
+    <div class="hero-bg"></div>
+  </section>
+
+  <div class="ticker-wrap">
+    <div class="ticker" id="liveTicker"></div>
+  </div>
+
+  <section class="section" id="games">
+    <div class="container">
+      <div class="section-header">
+        <h2>ជ្រើសរើសហ្គេម</h2>
+        <p>ជ្រើសរើសហ្គេមដែលអ្នកចង់ Top-up</p>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="gameSearch" placeholder="ស្វែងរកហ្គេម... (MLBB, Free Fire, PUBG...)" />
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </div>
+      <div class="games-grid" id="gamesGrid"></div>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="how">
+    <div class="container">
+      <div class="section-header">
+        <h2>របៀប Top-up</h2>
+        <p>ងាយស្រួលត្រឹម 3 ជំហាន</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>ជ្រើសរើសហ្គេម & Package</h3>
+          <p>ជ្រើសរើសហ្គេម និងកញ្ចប់ Diamonds / UC ដែលអ្នកចង់បាន</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>បញ្ចូល User ID</h3>
+          <p>បញ្ចូល Player ID និង Server (បើមាន) រួចផ្ទៀងផ្ទាត់</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>បង់ប្រាក់ & ទទួលភ្លាម</h3>
+          <p>បង់តាម KHQR / ABA និងទទួល Diamonds ក្នុងរយៈពេលប៉ុន្មានវិនាទី</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section-header"><h2>សំណួរញឹកញាប់</h2></div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-q">តើដឹកជញ្ជូនយ៉ាងលឿនប៉ុណ្ណា?<span>+</span></button>
+          <div class="faq-a">ភាគច្រើននៃ order ត្រូវបានដឹកជញ្ជូនក្នុងរយៈពេល 10–60 វិនាទី បន្ទាប់ពីបង់ប្រាក់ជោគជ័យ។</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">តើមានសុវត្ថិភាពទេ?<span>+</span></button>
+          <div class="faq-a">បាទ/ចាស។ យើងប្រើ API ផ្លូវការពី Khmer TopUp និងប្រព័ន្ធបង់ប្រាក់ KHQR ដែលមានសុវត្ថិភាពខ្ពស់។</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">បើ User ID ខុសយ៉ាងណា?<span>+</span></button>
+          <div class="faq-a">ប្រព័ន្ធនឹងផ្ទៀងផ្ទាត់ ID មុនពេលបង់ប្រាក់។ បើ ID មិនត្រឹមត្រូវ នឹងមិនអាចបញ្ជាទិញបានទេ។</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">អាចតាមដាន Order បានទេ?<span>+</span></button>
+          <div class="faq-a">បាទ។ បន្ទាប់ពីទិញ អ្នកនឹងទទួល Order Code ហើយអាចតាមដាននៅទំព័រ “តាមដាន Order”។</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <img src="/static/img/logo.svg" alt="" class="logo-img" width="36" height="36" />
+          <span class="logo-text">Angkor<span>TopUp</span></span>
+        </div>
+        <p>Top-up ហ្គេមលឿន សុវត្ថិភាព និងថោកបំផុតនៅកម្ពុជា។</p>
+      </div>
+      <div class="footer-links">
+        <div>
+          <h4>តំណភ្ជាប់</h4>
+          <a href="#games">ហ្គេម</a>
+          <a href="/track">តាមដាន Order</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div>
+          <h4>ទំនាក់ទំនង</h4>
+          <a href="https://t.me/kairozen_support" target="_blank" rel="noopener">Telegram Support</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">© 2026 AngkorTopUp. All rights reserved. | Powered by <a href="https://t.me/kairozen_support" target="_blank" rel="noopener">@kairozen_support</a></div>
+    </div>
+  </footer>
+
+  <!-- Top-up Modal -->
+  <div class="modal" id="topupModal">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-box">
+      <button class="modal-close" data-close>&times;</button>
+      <div class="modal-header">
+        <div id="modalGameEmoji" class="modal-game-emoji">🎮</div>
+        <div>
+          <h3 id="modalGameName">Mobile Legends</h3>
+          <p id="modalGameSlug" class="text-muted">mobile-legends</p>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-step active" id="stepPackages">
+          <h4>ជ្រើសរើស Package</h4>
+          <div class="packages-grid" id="packagesGrid"></div>
+        </div>
+        <div class="modal-step" id="stepPlayer">
+          <h4>បញ្ចូលព័ត៌មាន Player</h4>
+          <div class="form-group">
+            <label id="labelPlayerId">User ID / Player ID</label>
+            <input type="text" id="playerId" placeholder="បញ្ចូល User ID" autocomplete="off" />
+          </div>
+          <div class="form-group" id="serverGroup" style="display:none;">
+            <label id="labelServerId">Zone / Server ID</label>
+            <input type="text" id="serverId" placeholder="បញ្ចូល Server / Zone" autocomplete="off" />
+          </div>
+          <div class="verify-result" id="verifyResult"></div>
+          <button class="btn btn-primary btn-block" id="btnVerify">ផ្ទៀងផ្ទាត់ Account</button>
+        </div>
+        <div class="modal-step" id="stepConfirm">
+          <h4>បញ្ជាក់ Order</h4>
+          <div class="order-summary" id="orderSummary"></div>
+          <div class="payment-note">
+            <p>💡 បន្ទាប់ពីបញ្ជាទិញ នឹងបង្ហាញ <strong>KHQR</strong> ដើម្បីស្កេនបង់ប្រាក់ (KHPay)។</p>
+          </div>
+          <button class="btn btn-primary btn-block btn-lg" id="btnPlaceOrder">បញ្ជាទិញ &amp; បង់ប្រាក់</button>
+        </div>
+        <div class="modal-step" id="stepSuccess">
+          <div class="success-icon">✓</div>
+          <h4>Order ជោគជ័យ!</h4>
+          <div class="order-code-box">
+            <span>Order Code</span>
+            <strong id="successOrderCode">KT-XXXXXX</strong>
+          </div>
+          <p class="text-center text-muted">សូមរក្សាទុក Order Code នេះដើម្បីតាមដាន</p>
+          <a href="/track" class="btn btn-primary btn-block">តាមដាន Order →</a>
+          <button class="btn btn-ghost btn-block" data-close>បិទ</button>
+        </div>
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button class="btn btn-ghost" id="btnBack" style="display:none;">← ត្រឡប់</button>
+        <div class="selected-pkg" id="selectedPkgInfo"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/data.js"></script>
+  <script src="/static/js/app.js"></script>
+  <!-- Floating Telegram -->
+  <a href="https://t.me/kairozen_support" id="tgFloat" class="tg-float" target="_blank" rel="noopener" title="Telegram Support" aria-label="Telegram">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+  </a>
+</body>
+</html>
