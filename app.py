@@ -134,6 +134,27 @@ def track_page():
     return render_template("track.html")
 
 
+@app.route("/game/<slug>")
+@app.route("/games/<slug>")
+def game_page(slug):
+    try:
+        track_visitor()
+    except Exception:
+        pass
+    return render_template("game.html", slug=slug)
+
+
+@app.route("/profile")
+@app.route("/account")
+def profile_page():
+    try:
+        track_visitor()
+    except Exception:
+        pass
+    return render_template("profile.html")
+
+
+
 # ---------- Public API ----------
 @app.route("/api/catalog")
 def catalog():
