@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#f5a623" />
+  <title id="pageTitle">Top-up | AngkorTopUp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/game.css" />
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
+</head>
+<body class="game-page">
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="icon-btn" aria-label="Back" style="text-decoration:none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a120b" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <a href="/" class="logo">
+      <img src="/static/img/logo.svg" alt="" class="logo-img" id="siteLogo" width="40" height="40" />
+      <span class="logo-text" id="siteLogoText">Angkor<span>TopUp</span></span>
+    </a>
+    <a href="/track" class="btn btn-login">TRACK</a>
+  </div>
+</header>
+
+<!-- Banner -->
+<div class="banner-carousel">
+  <div class="banner-slides">
+    <div class="banner-slide active">
+      <img src="/static/img/banner.svg" alt="" id="siteBanner" class="banner-img" />
+    </div>
+  </div>
+</div>
+
+<div class="container game-wrap">
+  <!-- Game title -->
+  <div class="game-hero">
+    <div class="game-hero-icon" id="gIcon">🎮</div>
+    <div>
+      <h1 id="gName">Game</h1>
+      <div class="game-hero-meta">
+        <span>⚡ Safety guarantees</span>
+        <span>·</span>
+        <span>Instant delivery</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enter info -->
+  <div class="info-card">
+    <div class="info-card-head">
+      <span class="info-card-title">👤 ENTER YOUR INFORMATION</span>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <input type="text" id="playerId" placeholder="Game ID" autocomplete="off" />
+    </div>
+    <div class="form-group" id="serverGroup" style="display:none;margin-bottom:12px">
+      <input type="text" id="serverId" placeholder="Server / Zone" autocomplete="off" />
+    </div>
+    <div class="player-row">
+      <span class="player-label">PLAYER</span>
+      <span class="player-status" id="playerStatus">Not checked</span>
+    </div>
+    <div class="verify-result" id="verifyResult"></div>
+    <button type="button" class="btn btn-primary btn-block" id="btnVerify" style="margin-top:12px">ផ្ទៀងផ្ទាត់ Account</button>
+  </div>
+
+  <!-- Packages -->
+  <div class="pkg-section">
+    <div class="section-header" style="margin-bottom:12px">
+      <h2><span class="icon">💎</span> BEST SELLING</h2>
+      <span class="badge-count" id="pkgCount">0 ITEMS</span>
+    </div>
+    <div class="pkg-grid" id="pkgGrid"></div>
+  </div>
+</div>
+
+<!-- Sticky pay bar -->
+<div class="pay-bar">
+  <div class="pay-bar-left">
+    <div class="pay-total">Total: <strong id="payTotal">$0.00</strong></div>
+    <div class="pay-product" id="payProduct">Product: -</div>
+  </div>
+  <button type="button" class="btn-pay" id="btnPay" disabled>Pay Now</button>
+</div>
+
+<!-- Pay modal (QR) -->
+<div class="modal" id="payModal">
+  <div class="modal-backdrop" id="payBackdrop"></div>
+  <div class="modal-box">
+    <button class="modal-close" type="button" id="payClose">&times;</button>
+    <div class="modal-body" style="padding-top:28px">
+      <div id="payContent"></div>
+    </div>
+  </div>
+</div>
+
+<a href="https://t.me/kairozen_support" id="tgFloat" class="tg-float" target="_blank" rel="noopener" aria-label="Telegram">
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+</a>
+
+<script>
+const SLUG = {{ slug|tojson }};
+const API = "/api";
+let GAME = null;
+let selectedPkg = null;
+let verifiedNick = null;
+let _poll = null;
+
+const $ = s => document.querySelector(s);
+function money(n){ return "$" + Number(n).toFixed(2); }
+function esc(s){ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+async function api(path, opts={}){
+  const r = await fetch(API+"/"+path, {
+    headers:{"Content-Type":"application/json",...(opts.headers||{})},
+    ...opts
+  });
+  return r.json();
+}
+
+async function load(){
+  const r = await api("catalog");
+  if(!r.ok){ alert("ផ្ទុកបរាជ័យ"); return; }
+  if(r.settings){
+    const tg = r.settings.TELEGRAM || "https://t.me/kairozen_support";
+    const f = document.getElementById("tgFloat"); if(f) f.href = tg;
+    if(r.settings.BANNER_URL) $("#siteBanner").src = r.settings.BANNER_URL;
+    if(r.settings.LOGO_URL) document.querySelectorAll(".logo-img").forEach(el=>el.src=r.settings.LOGO_URL);
+  }
+  GAME = (r.games||[]).find(g => g.slug === SLUG);
+  if(!GAME){
+    document.querySelector(".game-wrap").innerHTML = '<p style="text-align:center;padding:60px;color:var(--text-muted)">មិនឃើញហ្គេមនេះ<br><a href="/" style="color:var(--orange)">← ត្រឡប់</a></p>';
+    return;
+  }
+  document.title = (GAME.name||SLUG) + " | AngkorTopUp";
+  $("#gName").textContent = GAME.name;
+  const icon = $("#gIcon");
+  if(GAME.image){
+    icon.innerHTML = '<img src="'+esc(GAME.image)+'" alt="">';
+  } else {
+    icon.textContent = GAME.emoji || "🎮";
+  }
+  if(GAME.server_label){
+    $("#serverGroup").style.display = "block";
+    $("#serverId").placeholder = GAME.server_label;
+  }
+  $("#playerId").placeholder = GAME.id_label || "Game ID";
+  renderPkgs();
+
+  // Prefill from profile
+  try {
+    const prof = JSON.parse(localStorage.getItem("angkor_profile")||"{}");
+    const ids = JSON.parse(localStorage.getItem("angkor_game_ids")||"{}");
+    if (ids[SLUG] && ids[SLUG].player_id) {
+      $("#playerId").value = ids[SLUG].player_id;
+      if (ids[SLUG].server_id) $("#serverId").value = ids[SLUG].server_id;
+    } else if (prof.defaultId) {
+      $("#playerId").value = prof.defaultId;
+    }
+  } catch(e){}
+
+}
+
+function renderPkgs(){
+  const list = GAME.packages || [];
+  $("#pkgCount").textContent = list.length + " ITEMS";
+  $("#pkgGrid").innerHTML = list.map(p => {
+    const id = p.id || p.package_id;
+    return `<div class="pkg-item" data-id="${id}" onclick="selectPkg(${id})">
+      <div class="pkg-item-icon">${p.tag ? "🔥" : "💎"}</div>
+      <div>
+        <div class="pkg-item-price">${money(p.price)}</div>
+        <div class="pkg-item-name">${esc(p.name)}</div>
+      </div>
+    </div>`;
+  }).join("") || '<p style="color:var(--text-muted)">គ្មាន package</p>';
+}
+
+function selectPkg(id){
+  selectedPkg = (GAME.packages||[]).find(p => (p.id||p.package_id) == id);
+  document.querySelectorAll(".pkg-item").forEach(el => {
+    el.classList.toggle("selected", Number(el.dataset.id) === Number(id));
+  });
+  updateBar();
+}
+
+function updateBar(){
+  if(selectedPkg){
+    $("#payTotal").textContent = money(selectedPkg.price);
+    $("#payProduct").textContent = "Product: " + selectedPkg.name;
+    $("#btnPay").disabled = false;
+  } else {
+    $("#payTotal").textContent = "$0.00";
+    $("#payProduct").textContent = "Product: -";
+    $("#btnPay").disabled = true;
+  }
+}
+
+$("#btnVerify").onclick = async function(){
+  const playerId = ($("#playerId").value||"").trim();
+  const serverId = ($("#serverId").value||"").trim();
+  const box = $("#verifyResult");
+  const st = $("#playerStatus");
+  if(!playerId){
+    box.className = "verify-result invalid";
+    box.textContent = "សូមបញ្ចូល Game ID";
+    return;
+  }
+  this.disabled = true;
+  this.textContent = "កំពុងផ្ទៀងផ្ទាត់...";
+  try {
+    const r = await api("verify", {
+      method:"POST",
+      body: JSON.stringify({ slug: GAME.slug, player_id: playerId, server_id: serverId||undefined })
+    });
+    if(r.result === "valid"){
+      verifiedNick = r.nickname || "Player";
+      box.className = "verify-result valid";
+      box.innerHTML = "✓ " + esc(verifiedNick);
+      st.textContent = verifiedNick;
+      st.className = "player-status ok";
+    } else if(r.result === "invalid"){
+      verifiedNick = null;
+      box.className = "verify-result invalid";
+      box.textContent = "✗ Account មិនត្រឹមត្រូវ";
+      st.textContent = "Invalid";
+      st.className = "player-status bad";
+    } else {
+      verifiedNick = null;
+      box.className = "verify-result valid";
+      box.textContent = "✓ បន្តបាន";
+      st.textContent = "OK";
+      st.className = "player-status ok";
+    }
+  } catch(e){
+    box.className = "verify-result invalid";
+    box.textContent = e.message;
+  }
+  this.disabled = false;
+  this.textContent = "ផ្ទៀងផ្ទាត់ Account";
+};
+
+$("#btnPay").onclick = async function(){
+  const playerId = ($("#playerId").value||"").trim();
+  const serverId = ($("#serverId").value||"").trim();
+  if(!playerId){ alert("សូមបញ្ចូល Game ID"); $("#playerId").focus(); return; }
+  if(!selectedPkg){ alert("ជ្រើស Package"); return; }
+  this.disabled = true;
+  this.textContent = "...";
+  try {
+    const r = await api("order", {
+      method:"POST",
+      body: JSON.stringify({
+        game_slug: GAME.slug,
+        package_id: selectedPkg.id || selectedPkg.package_id,
+        player_id: playerId,
+        server_id: serverId || undefined
+      })
+    });
+    if(!r.ok){ alert(r.error||"បរាជ័យ"); this.disabled=false; this.textContent="Pay Now"; return; }
+    const o = r.order;
+    const pay = r.payment || {};
+    $("#payContent").innerHTML = `
+      <div style="text-align:center">
+        <div style="font-size:.85rem;color:var(--text-muted)">${esc(pay.SHOP_NAME||"AngkorTopUp")} · KHPay</div>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--orange);margin:8px 0">${money(o.price)}</div>
+        <div style="font-size:.82rem;color:var(--text-muted);margin-bottom:8px">ស្កេន KHQR (គ្រប់ធនាគារ)</div>
+        ${pay.PAYMENT_QR
+          ? `<img src="${esc(pay.PAYMENT_QR)}" alt="KHQR" style="max-width:210px;width:100%;margin:8px auto;background:#fff;border-radius:12px;padding:8px;display:block">`
+          : `<div style="color:var(--danger);padding:12px">មិនមាន QR — ត្រូវដាក់ KHPAY_API_KEY</div>`}
+        <div style="font-size:.78rem;color:var(--text-muted)">Order: <b style="color:var(--orange)">${esc(o.id)}</b></div>
+        <div id="payStatus" style="font-size:.85rem;color:var(--text-muted);margin-top:8px">រង់ចាំបង់ប្រាក់...</div>
+        <button class="btn btn-primary btn-block" style="margin-top:14px" type="button" id="btnPaid">✓ ខ្ញុំបានបង់ហើយ</button>
+      </div>`;
+
+    // save game id
+    try {
+      const ids = JSON.parse(localStorage.getItem("angkor_game_ids")||"{}");
+      ids[GAME.slug] = { name: GAME.name, player_id: playerId, server_id: serverId||"" };
+      localStorage.setItem("angkor_game_ids", JSON.stringify(ids));
+    } catch(e){}
+
+    $("#payModal").classList.add("open");
+    document.body.style.overflow = "hidden";
+    document.getElementById("btnPaid").onclick = () => confirmPaid(o.id);
+    startPoll(o.id);
+  } catch(e){
+    alert(e.message);
+  }
+  this.disabled = false;
+  this.textContent = "Pay Now";
+};
+
+function startPoll(orderId){
+  if(_poll) clearInterval(_poll);
+  let n=0;
+  _poll = setInterval(async()=>{
+    n++; if(n>90){ clearInterval(_poll); return; }
+    try{
+      const r = await api("order/check-payment",{method:"POST",body:JSON.stringify({order_id:orderId})});
+      const st = $("#payStatus");
+      if(st) st.textContent = "ស្ថានភាព: "+(r.payment_status||"...");
+      if(r.payment_status==="completed" || ["paid","processing","completed","waiting_fulfill","delivered"].includes(r.order?.status)){
+        clearInterval(_poll);
+        showDone(r.order, r.message);
+      }
+    }catch(e){}
+  },4000);
+}
+
+async function confirmPaid(orderId){
+  const btn = document.getElementById("btnPaid");
+  if(btn){ btn.disabled=true; btn.textContent="កំពុងផ្ទៀងផ្ទាត់..."; }
+  const r = await api("order/confirm-paid",{method:"POST",body:JSON.stringify({order_id:orderId})});
+  if(!r.ok){
+    alert(r.error||"មិនទាន់ទទួលប្រាក់");
+    if(btn){ btn.disabled=false; btn.textContent="✓ ខ្ញុំបានបង់ហើយ"; }
+    return;
+  }
+  if(_poll) clearInterval(_poll);
+  showDone(r.order, r.message);
+}
+
+function showDone(o, message){
+  $("#payContent").innerHTML = `
+    <div style="text-align:center">
+      <div class="success-icon">✓</div>
+      <h3 style="margin-bottom:8px">Order ជោគជ័យ!</h3>
+      <div class="order-code-box">
+        <span>Order Code</span>
+        <strong>${esc(o.id)}</strong>
+      </div>
+      <p style="font-size:.9rem;color:var(--text-muted);margin-bottom:12px">${esc(o.game_name||"")} · ${esc(o.package_name||"")}<br>Player: ${esc(o.player_id||"")}</p>
+      <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px">${esc(message||"")}</p>
+      <a href="/track" class="btn btn-primary btn-block">តាមដាន Order</a>
+      <button class="btn btn-ghost btn-block" type="button" onclick="closePay()" style="margin-top:8px">បិទ</button>
+    </div>`;
+}
+
+function closePay(){
+  if(_poll) clearInterval(_poll);
+  $("#payModal").classList.remove("open");
+  document.body.style.overflow = "";
+}
+$("#payClose").onclick = closePay;
+$("#payBackdrop").onclick = closePay;
+
+window.selectPkg = selectPkg;
+load();
+</script>
+</body>
+</html>

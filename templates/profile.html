@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#f5a623" />
+  <title>កំណត់ព័ត៌មាន | AngkorTopUp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/game.css" />
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg" />
+  <style>
+    .profile-wrap { max-width: 480px; margin: 0 auto; padding: 16px 14px 100px; }
+    .profile-card {
+      background: var(--bg-card); border: 1.5px solid var(--border);
+      border-radius: 18px; padding: 18px; margin-bottom: 14px;
+    }
+    .profile-card h2 {
+      font-size: .95rem; font-weight: 800; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .profile-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--grad-btn); color: #1a120b;
+      font-size: 2rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px; border: 3px solid rgba(255,184,0,.4);
+    }
+    .profile-name-display {
+      text-align: center; font-size: 1.2rem; font-weight: 800; margin-bottom: 4px;
+    }
+    .profile-sub {
+      text-align: center; color: var(--text-muted); font-size: .85rem; margin-bottom: 16px;
+    }
+    .saved-id-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 12px; background: var(--bg-elevated);
+      border-radius: 12px; margin-bottom: 8px; gap: 8px;
+    }
+    .saved-id-row .game { font-weight: 700; font-size: .88rem; }
+    .saved-id-row .id { color: var(--orange); font-family: monospace; font-size: .85rem; }
+    .saved-id-row button {
+      background: none; border: none; color: var(--danger);
+      cursor: pointer; font-size: .8rem; font-weight: 600;
+    }
+    .link-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px; background: var(--bg-elevated);
+      border-radius: 14px; margin-bottom: 8px;
+      border: 1px solid var(--border); transition: border-color .2s;
+    }
+    .link-row:hover { border-color: var(--orange); }
+    .link-row .ico { font-size: 1.4rem; width: 36px; text-align: center; }
+    .link-row .txt { flex: 1; }
+    .link-row .txt b { display: block; font-size: .92rem; }
+    .link-row .txt span { font-size: .78rem; color: var(--text-muted); }
+    .link-row .arrow { color: var(--text-muted); }
+    .toast-p {
+      position: fixed; left: 16px; right: 16px; bottom: 24px; z-index: 300;
+      background: var(--bg-elevated); border: 1px solid var(--orange);
+      color: var(--text); padding: 12px 16px; border-radius: 14px;
+      text-align: center; font-weight: 600; font-size: .9rem;
+      transform: translateY(120%); transition: transform .25s;
+    }
+    .toast-p.show { transform: none; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="icon-btn" aria-label="Back" style="text-decoration:none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a120b" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <a href="/" class="logo">
+      <img src="/static/img/logo.svg" alt="" class="logo-img" width="40" height="40" />
+      <span class="logo-text">Angkor<span>TopUp</span></span>
+    </a>
+    <a href="/track" class="btn btn-login">TRACK</a>
+  </div>
+</header>
+
+<div class="profile-wrap">
+  <!-- Profile head -->
+  <div class="profile-card">
+    <div class="profile-avatar" id="avatar">U</div>
+    <div class="profile-name-display" id="displayName">អ្នកប្រើ</div>
+    <div class="profile-sub" id="displaySub">កំណត់ព័ត៌មានរបស់អ្នក</div>
+  </div>
+
+  <!-- Edit form -->
+  <div class="profile-card">
+    <h2>✏️ ព័ត៌មានផ្ទាល់ខ្លួន</h2>
+    <div class="form-group">
+      <label style="display:block;font-size:.8rem;color:var(--text-muted);margin-bottom:6px;font-weight:600">ឈ្មោះ / Nickname</label>
+      <input type="text" id="pName" placeholder="ឧ. ProGamer" style="width:100%;padding:12px 14px;background:var(--bg-elevated);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:1rem;outline:none" />
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label style="display:block;font-size:.8rem;color:var(--text-muted);margin-bottom:6px;font-weight:600">Telegram / ទំនាក់ទំនង</label>
+      <input type="text" id="pContact" placeholder="@username ឬ លេខទូរស័ព្ទ" style="width:100%;padding:12px 14px;background:var(--bg-elevated);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:1rem;outline:none" />
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label style="display:block;font-size:.8rem;color:var(--text-muted);margin-bottom:6px;font-weight:600">Game ID លំនាំដើម</label>
+      <input type="text" id="pDefaultId" placeholder="ID ដែលប្រើញឹកញាប់" style="width:100%;padding:12px 14px;background:var(--bg-elevated);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:1rem;outline:none" />
+    </div>
+    <button type="button" class="btn btn-primary btn-block" style="margin-top:16px" onclick="saveProfile()">💾 រក្សាទុក</button>
+  </div>
+
+  <!-- Saved game IDs -->
+  <div class="profile-card">
+    <h2>🎮 Game ID រក្សាទុក</h2>
+    <div id="savedIds">
+      <p style="color:var(--text-muted);font-size:.9rem;text-align:center;padding:12px">មិនទាន់មាន — នឹងរក្សាទុកពេល Top-up</p>
+    </div>
+  </div>
+
+  <!-- Quick links -->
+  <div class="profile-card">
+    <h2>🔗 តំណភ្ជាប់</h2>
+    <a href="/track" class="link-row">
+      <span class="ico">📋</span>
+      <span class="txt"><b>តាមដាន Order</b><span>ពិនិត្យស្ថានភាពការបញ្ជាទិញ</span></span>
+      <span class="arrow">›</span>
+    </a>
+    <a href="/" class="link-row">
+      <span class="ico">🎮</span>
+      <span class="txt"><b>ហ្គេមទាំងអស់</b><span>ជ្រើសរើស Top-up</span></span>
+      <span class="arrow">›</span>
+    </a>
+    <a href="https://t.me/kairozen_support" id="tgLink" class="link-row" target="_blank" rel="noopener">
+      <span class="ico">✈️</span>
+      <span class="txt"><b>Telegram Support</b><span>@kairozen_support</span></span>
+      <span class="arrow">›</span>
+    </a>
+  </div>
+
+  <button type="button" class="btn btn-ghost btn-block" onclick="clearProfile()" style="color:var(--danger);margin-top:8px">លុបព័ត៌មានទាំងអស់</button>
+</div>
+
+<div class="toast-p" id="toast">រក្សាទុករួច</div>
+
+<a href="https://t.me/kairozen_support" id="tgFloat" class="tg-float" target="_blank" rel="noopener" aria-label="Telegram">
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+</a>
+
+<script>
+const KEY = "angkor_profile";
+const IDS_KEY = "angkor_game_ids";
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function loadProfile(){
+  let p = {};
+  try { p = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){}
+  document.getElementById("pName").value = p.name || "";
+  document.getElementById("pContact").value = p.contact || "";
+  document.getElementById("pDefaultId").value = p.defaultId || "";
+  refreshHead(p);
+  renderSavedIds();
+}
+
+function refreshHead(p){
+  const name = p.name || "អ្នកប្រើ";
+  document.getElementById("displayName").textContent = name;
+  document.getElementById("avatar").textContent = (name[0] || "U").toUpperCase();
+  document.getElementById("displaySub").textContent = p.contact || "កំណត់ព័ត៌មានរបស់អ្នក";
+}
+
+function saveProfile(){
+  const p = {
+    name: document.getElementById("pName").value.trim(),
+    contact: document.getElementById("pContact").value.trim(),
+    defaultId: document.getElementById("pDefaultId").value.trim(),
+  };
+  localStorage.setItem(KEY, JSON.stringify(p));
+  refreshHead(p);
+  toast("✅ រក្សាទុករួច");
+}
+
+function renderSavedIds(){
+  let ids = {};
+  try { ids = JSON.parse(localStorage.getItem(IDS_KEY) || "{}"); } catch(e){}
+  const el = document.getElementById("savedIds");
+  const keys = Object.keys(ids);
+  if(!keys.length){
+    el.innerHTML = '<p style="color:var(--text-muted);font-size:.9rem;text-align:center;padding:12px">មិនទាន់មាន — នឹងរក្សាទុកពេល Top-up</p>';
+    return;
+  }
+  el.innerHTML = keys.map(slug => `
+    <div class="saved-id-row">
+      <div>
+        <div class="game">${ids[slug].name || slug}</div>
+        <div class="id">${ids[slug].player_id}${ids[slug].server_id ? " / "+ids[slug].server_id : ""}</div>
+      </div>
+      <button type="button" onclick="removeId('${slug}')">លុប</button>
+    </div>
+  `).join("");
+}
+
+function removeId(slug){
+  let ids = {};
+  try { ids = JSON.parse(localStorage.getItem(IDS_KEY) || "{}"); } catch(e){}
+  delete ids[slug];
+  localStorage.setItem(IDS_KEY, JSON.stringify(ids));
+  renderSavedIds();
+  toast("លុបរួច");
+}
+
+function clearProfile(){
+  if(!confirm("លុបព័ត៌មាន + Game ID ទាំងអស់?")) return;
+  localStorage.removeItem(KEY);
+  localStorage.removeItem(IDS_KEY);
+  loadProfile();
+  toast("លុបទាំងអស់រួច");
+}
+
+// Load telegram from catalog
+fetch("/api/catalog").then(r=>r.json()).then(d=>{
+  if(d.settings && d.settings.TELEGRAM){
+    const u = d.settings.TELEGRAM;
+    ["tgLink","tgFloat"].forEach(id=>{ const el=document.getElementById(id); if(el) el.href=u; });
+  }
+  if(d.settings && d.settings.LOGO_URL){
+    document.querySelectorAll(".logo-img").forEach(el=>el.src=d.settings.LOGO_URL);
+  }
+}).catch(()=>{});
+
+loadProfile();
+</script>
+</body>
+</html>
