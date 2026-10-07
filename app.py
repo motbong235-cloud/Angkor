@@ -504,6 +504,7 @@ def admin_game():
             "id_label": body.get("id_label") or "User ID",
             "server_label": body.get("server_label") or None,
             "emoji": body.get("emoji") or "🎮",
+            "image": (body.get("image") or "").strip() or None,
             "color": body.get("color") or "#3B82F6",
             "popular": bool(body.get("popular", False)),
             "active": True,
@@ -517,7 +518,7 @@ def admin_game():
     slug = body.get("slug")
     for g in d.get("games", []):
         if g.get("slug") == slug:
-            for k in ("name", "id_label", "server_label", "emoji", "color", "packages"):
+            for k in ("name", "id_label", "server_label", "emoji", "image", "color", "packages"):
                 if k in body:
                     g[k] = body[k]
             if "popular" in body:
@@ -557,11 +558,16 @@ def admin_settings():
     for k in (
         "SITE_NAME", "SITE_TAGLINE", "TELEGRAM", "CONTACT_NOTE",
         "LOGO_URL", "BANNER_URL", "FAVICON_URL",
-        "ADMIN_PASSWORD", "AUTO_FULFILL",
+        "ADMIN_PASSWORD", "AUTO_FULFILL", "PRICE_MARKUP_PERCENT",
     ):
         if k in body and body[k] is not None:
             if k == "AUTO_FULFILL":
                 s[k] = bool(body[k]) if not isinstance(body[k], str) else body[k] in ("1", "true", "True", True)
+            elif k == "PRICE_MARKUP_PERCENT":
+                try:
+                    s[k] = float(body[k])
+                except (TypeError, ValueError):
+                    s[k] = 0
             else:
                 s[k] = body[k]
     db_write(d)
@@ -588,12 +594,16 @@ def admin_sync_games():
         slug = rg.get("slug") or ""
         if not slug:
             continue
+        markup = float((d.get("settings") or {}).get("PRICE_MARKUP_PERCENT") or 0)
         packages = []
         for i, p in enumerate(rg.get("packages") or []):
+            base = float(p.get("price") or 0)
+            sell = round(base * (1 + markup / 100.0), 2) if markup else base
             packages.append({
                 "id": p.get("package_id") or (1000 + i),
                 "name": p.get("name") or f"Pack {i+1}",
-                "price": float(p.get("price") or 0),
+                "price": sell,
+                "base_price": base,
                 "tag": p.get("tag"),
                 "kt_package_id": p.get("package_id"),
             })
@@ -610,9 +620,10 @@ def admin_sync_games():
                 "id_label": rg.get("id_label") or "User ID",
                 "server_label": rg.get("server_label"),
                 "emoji": "🎮",
+                "image": None,
                 "color": "#3B82F6",
                 "popular": False,
-                "active": True,
+                "active": False,  # user selects which to enable
                 "packages": packages,
             }
             added += 1
@@ -630,6 +641,67 @@ def health():
         "khpay": khpay.is_ready(),
         "khmer_topup": khmer_topup.is_ready(),
     })
+
+
+
+
+@app.route("/api/admin/games/clear", methods=["POST"])
+@admin_required
+def admin_games_clear():
+    """Delete all games from catalog."""
+    d = db_read()
+    d["games"] = []
+    db_write(d)
+    return jsonify({"ok": True, "message": "លុបហ្គេមទាំងអស់រួច"})
+
+
+@app.route("/api/admin/games/apply-markup", methods=["POST"])
+@admin_required
+def admin_apply_markup():
+    """Re-apply PRICE_MARKUP_PERCENT on all packages (uses base_price if present)."""
+    body = request.get_json(force=True, silent=True) or {}
+    d = db_read()
+    if "percent" in body:
+        try:
+            markup = float(body["percent"])
+        except (TypeError, ValueError):
+            markup = 0
+        d.setdefault("settings", {})["PRICE_MARKUP_PERCENT"] = markup
+    else:
+        markup = float((d.get("settings") or {}).get("PRICE_MARKUP_PERCENT") or 0)
+
+    count = 0
+    for g in d.get("games", []):
+        for p in g.get("packages") or []:
+            base = p.get("base_price")
+            if base is None:
+                base = float(p.get("price") or 0)
+                p["base_price"] = base
+            else:
+                base = float(base)
+            p["price"] = round(base * (1 + markup / 100.0), 2)
+            count += 1
+    db_write(d)
+    return jsonify({"ok": True, "markup": markup, "packages_updated": count})
+
+
+@app.route("/api/admin/games/bulk-active", methods=["POST"])
+@admin_required
+def admin_bulk_active():
+    """Enable/disable multiple games. body: {slugs:[...], active: true/false} or {all: true, active: bool}"""
+    body = request.get_json(force=True, silent=True) or {}
+    active = bool(body.get("active", True))
+    d = db_read()
+    if body.get("all"):
+        for g in d.get("games", []):
+            g["active"] = active
+    else:
+        slugs = set(body.get("slugs") or [])
+        for g in d.get("games", []):
+            if g.get("slug") in slugs:
+                g["active"] = active
+    db_write(d)
+    return jsonify({"ok": True})
 
 
 if __name__ == "__main__":
