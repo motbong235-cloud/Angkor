@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f1a"/>
+      <stop offset="50%" stop-color="#121826"/>
+      <stop offset="100%" stop-color="#0b0f1a"/>
+    </linearGradient>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="80%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="360" fill="url(#bg)"/>
+  <rect width="1200" height="360" fill="url(#glow)"/>
+  <!-- decorative circles -->
+  <circle cx="980" cy="100" r="120" stroke="url(#g)" stroke-width="1.5" opacity="0.25" fill="none"/>
+  <circle cx="980" cy="100" r="70" stroke="url(#g)" stroke-width="1" opacity="0.2" fill="none"/>
+  <path d="M1010 40 L960 120 H995 L975 180 L1045 100 H1005 Z" fill="url(#g)" opacity="0.9"/>
+  <!-- text -->
+  <text x="64" y="130" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="52" fill="#e8eef8">Top-up ហ្គេម</text>
+  <text x="64" y="190" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="40" fill="url(#g)">លឿន • សុវត្ថិភាព • ថោក</text>
+  <text x="64" y="250" font-family="Inter,Arial,sans-serif" font-size="20" fill="#8b9bb4">Mobile Legends · Free Fire · PUBG · និងច្រើនទៀត</text>
+  <rect x="64" y="280" width="160" height="40" rx="12" fill="url(#g)"/>
+  <text x="144" y="306" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="16" fill="#fff" text-anchor="middle">ជ្រើសរើសហ្គេម →</text>
+</svg>

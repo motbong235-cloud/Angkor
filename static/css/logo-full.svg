@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 96" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="80" height="80" x="8" y="8" rx="20" fill="#0b0f1a"/>
+  <rect x="12" y="12" width="72" height="72" rx="16" fill="url(#g)" opacity="0.18"/>
+  <path d="M54 18 L34 52 H48 L42 78 L66 42 H52 Z" fill="url(#g)"/>
+  <text x="104" y="58" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="36" fill="#e8eef8">Angkor</text>
+  <text x="248" y="58" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="36" fill="#22d3ee">TopUp</text>
+</svg>
