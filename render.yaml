@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: angkor-topup
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        value: admin123
+      - key: KHPAY_API_KEY
+        sync: false
+      - key: KHMER_TOPUP_API_KEY
+        sync: false
+      - key: DATA_DIR
+        value: /var/data
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+    disk:
+      name: angkor-data
+      mountPath: /var/data
+      sizeGB: 1
