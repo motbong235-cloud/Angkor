@@ -58,16 +58,19 @@ async function loadCatalog() {
 function renderGames(games) {
   const grid = document.getElementById("gamesGrid");
   if (!grid) return;
+  const countEl = document.getElementById("gameCount");
+  if (countEl) countEl.textContent = games.length + " GAMES";
   grid.innerHTML = games
     .map(
       (g) => `
     <div class="game-card ${g.popular ? "popular" : ""}" onclick="openTopup('${g.slug}')">
-      <div class="game-img" style="background:${g.color || "#6366f1"}33;overflow:hidden">
+      <div class="game-img" style="background:${g.color || "#2e2218"}">
         ${g.image
-          ? `<img src="${g.image}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:16px">`
+          ? `<img src="${g.image}" alt="">`
           : (g.emoji || "🎮")}
       </div>
       <div class="game-name">${g.name}</div>
+      <button type="button" class="game-topup-btn" onclick="event.stopPropagation();openTopup('${g.slug}')">TOPUP</button>
     </div>`
     )
     .join("");
@@ -117,6 +120,11 @@ function setupEventListeners() {
 }
 
 function openTopup(slug) {
+  // Dedicated game page (Puma-style)
+  window.location.href = "/game/" + encodeURIComponent(slug);
+  return;
+  // --- legacy modal below (unused) ---
+
   const list = window.GAMES || GAMES;
   currentGame = list.find((g) => g.slug === slug);
   if (!currentGame) return;
